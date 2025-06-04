@@ -126,7 +126,7 @@ mcp = FastMCP("Google Spreadsheet",
 def get_sheet_data(spreadsheet_id: str, 
                    sheet: str,
                    range: Optional[str] = None,
-                   ctx: Context = None) -> Dict[str, Any]:
+                   ctx: Context = None) -> List[Dict[str, Any]]:
     """
     Get data from a specific sheet in a Google Spreadsheet.
     
@@ -136,25 +136,45 @@ def get_sheet_data(spreadsheet_id: str,
         range: Optional cell range in A1 notation (e.g., 'A1:C10'). If not provided, gets all data.
     
     Returns:
-        Grid data structure with full metadata from Google Sheets API
+        A list of dictionaries, where each dictionary represents a row,
+        with column headers as keys.
     """
     sheets_service = ctx.request_context.lifespan_context.sheets_service
     
-    # Construct the range - keep original API behavior
+    # Construct the range
     if range:
         full_range = f"{sheet}!{range}"
     else:
         full_range = sheet
     
-    # Use includeGridData to preserve empty cells and structure
-    result = sheets_service.spreadsheets().get(
+    # Call the Sheets API to get values
+    result = sheets_service.spreadsheets().values().get(
         spreadsheetId=spreadsheet_id,
-        ranges=[full_range],
-        includeGridData=True
+        range=full_range
     ).execute()
     
-    # Return the grid data as-is, preserving all Google's metadata
-    return result
+    # Get the values from the response
+    values = result.get('values', [])
+    
+    if not values:
+        return []
+
+    headers = values[0]
+    data_rows = values[1:]
+    
+    structured_data = []
+    for row in data_rows:
+        # Ensure row has the same number of columns as headers, pad with None if not
+        # This prevents errors if rows have varying lengths
+        row_data = {}
+        for i, header in enumerate(headers):
+            if i < len(row):
+                row_data[header] = row[i]
+            else:
+                row_data[header] = None # Or some other placeholder for missing values
+        structured_data.appendgit (row_data)
+            
+    return structured_data
 
 @mcp.tool()
 def get_sheet_formulas(spreadsheet_id: str,
