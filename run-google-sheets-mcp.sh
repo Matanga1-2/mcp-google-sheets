@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change to the port-mcp-server directory
-cd /Users/matangrady/dev/mcp-google-sheets
+cd /Users/matangrady/dev/mcp-google-sheets-matan
 
 # Run the server with the specified credentials
 export SERVICE_ACCOUNT_PATH="sheets-mcp-key.json"
