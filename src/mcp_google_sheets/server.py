@@ -172,7 +172,7 @@ def get_sheet_data(spreadsheet_id: str,
                 row_data[header] = row[i]
             else:
                 row_data[header] = None # Or some other placeholder for missing values
-        structured_data.appendgit (row_data)
+        structured_data.append(row_data)
             
     return structured_data
 
